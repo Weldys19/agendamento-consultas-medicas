@@ -3,13 +3,15 @@ package br.com.weldyscarmo.agendamento_consultas_medicas.user.useCases;
 import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.UserFoundException;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.PatientEntity;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.PatientRepository;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.dtos.CreatePatientDTO;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.dtos.CreatePatientRequestDTO;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.dtos.CreatePatientResponseDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.useCases.CreatePatientUseCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -29,10 +31,13 @@ public class CreatePatientUseCaseTest {
     @Mock
     private PatientRepository patientRepository;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @Test
     public void itShouldBePossibleToCreateAPatient(){
 
-        var patient = CreatePatientDTO.builder()
+        var patient = CreatePatientRequestDTO.builder()
                 .name("Weldys")
                 .email("weldyscarmo@gmail.com")
                 .username("WeldysdoCarmo")
@@ -43,18 +48,25 @@ public class CreatePatientUseCaseTest {
                 .id(UUID.randomUUID())
                 .build();
 
+
+        when(this.patientRepository.findByUsernameIgnoreCaseOrEmailIgnoreCase(patient.getUsername(),
+                patient.getEmail())).thenReturn(Optional.empty());
+
         when(this.patientRepository.save(any(PatientEntity.class))).thenReturn(patientIdGenerate);
+
+        when(this.passwordEncoder.encode(patient.getPassword())).thenReturn("hashPassword");
 
         var result = this.createPatientUseCase.execute(patient);
 
-        assertThat(result).hasFieldOrProperty("id");
-        assertNotNull(result.getId());
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(patientIdGenerate.getId());
+        assertThat(result).isInstanceOf(CreatePatientResponseDTO.class);
     }
 
     @Test
     public void itShouldNotBePossibleToCreateAPatient(){
 
-        var patient = CreatePatientDTO.builder()
+        var patient = CreatePatientRequestDTO.builder()
                 .email("weldyscarmo@gmail.com")
                 .username("WeldysdoCarmo")
                 .build();

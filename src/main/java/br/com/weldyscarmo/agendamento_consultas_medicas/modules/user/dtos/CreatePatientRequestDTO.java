@@ -13,7 +13,7 @@ import org.hibernate.validator.constraints.Length;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreatePatientDTO {
+public class CreatePatientRequestDTO {
 
     private String name;
 
