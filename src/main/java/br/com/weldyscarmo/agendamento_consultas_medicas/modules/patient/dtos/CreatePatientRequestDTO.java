@@ -1,4 +1,4 @@
-package br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.dtos;
+package br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -15,6 +15,7 @@ import org.hibernate.validator.constraints.Length;
 @NoArgsConstructor
 public class CreatePatientRequestDTO {
 
+    @NotBlank
     private String name;
 
     @NotBlank

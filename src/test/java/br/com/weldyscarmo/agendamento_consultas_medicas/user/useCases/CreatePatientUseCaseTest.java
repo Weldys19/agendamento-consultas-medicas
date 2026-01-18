@@ -1,11 +1,11 @@
 package br.com.weldyscarmo.agendamento_consultas_medicas.user.useCases;
 
 import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.UserFoundException;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.PatientEntity;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.PatientRepository;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.dtos.CreatePatientRequestDTO;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.dtos.CreatePatientResponseDTO;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.useCases.CreatePatientUseCase;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientEntity;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientRepository;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.CreatePatientRequestDTO;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.CreatePatientResponseDTO;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.useCases.CreatePatientUseCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +17,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;

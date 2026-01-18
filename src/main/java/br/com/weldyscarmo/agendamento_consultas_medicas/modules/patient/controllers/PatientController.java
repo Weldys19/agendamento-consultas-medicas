@@ -1,9 +1,8 @@
-package br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.controllers;
+package br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.controllers;
 
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.PatientEntity;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.dtos.CreatePatientRequestDTO;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.dtos.CreatePatientResponseDTO;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.useCases.CreatePatientUseCase;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.CreatePatientRequestDTO;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.CreatePatientResponseDTO;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.useCases.CreatePatientUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

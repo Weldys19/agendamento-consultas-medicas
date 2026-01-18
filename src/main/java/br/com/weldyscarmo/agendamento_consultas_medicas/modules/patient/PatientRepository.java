@@ -1,4 +1,4 @@
-package br.com.weldyscarmo.agendamento_consultas_medicas.modules.user;
+package br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

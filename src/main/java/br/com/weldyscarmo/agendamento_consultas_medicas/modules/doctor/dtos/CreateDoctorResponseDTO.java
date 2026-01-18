@@ -1,4 +1,4 @@
-package br.com.weldyscarmo.agendamento_consultas_medicas.modules.user.dtos;
+package br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,13 +10,13 @@ import java.util.UUID;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class CreatePatientResponseDTO {
+@AllArgsConstructor
+public class CreateDoctorResponseDTO {
 
-    private UUID id;
+    private UUID uuid;
     private String name;
-    private String username;
+    private String specialty;
     private String email;
     private LocalDateTime createdAt;
 }

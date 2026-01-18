@@ -21,6 +21,7 @@ public class SecurityConfig {
         httpSecurity.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> {
                         auth.requestMatchers("/patient/").permitAll()
+                                .requestMatchers("/doctor/").permitAll()
                                 .requestMatchers(SWAGGER_LIST).permitAll();
                         auth.anyRequest().authenticated();
                 });
