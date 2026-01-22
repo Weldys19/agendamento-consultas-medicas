@@ -40,4 +40,9 @@ public class ExceptionHandlerController {
     public ResponseEntity<String> handlerInvalidCredentialsException(InvalidCredentialsException e){
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
     }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<String> handlerInvalidTokenException(InvalidTokenException e){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+    }
 }

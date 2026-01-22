@@ -3,7 +3,7 @@ package br.com.weldyscarmo.agendamento_consultas_medicas.security.useCases;
 import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.InvalidCredentialsException;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.DoctorRepository;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientRepository;
-import br.com.weldyscarmo.agendamento_consultas_medicas.security.JWTProvider;
+import br.com.weldyscarmo.agendamento_consultas_medicas.security.JWTGenerate;
 import br.com.weldyscarmo.agendamento_consultas_medicas.security.dtos.AuthRequestDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.security.dtos.AuthUserDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.security.dtos.TokenResponseDTO;
@@ -24,10 +24,9 @@ public class AuthUserUseCase {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private JWTProvider jwtProvider;
+    private JWTGenerate jwtGenerate;
 
     public TokenResponseDTO execute(AuthRequestDTO authRequestDTO){
-
         var authUserDTO = mapUser(authRequestDTO);
 
         var passwordMatchers = passwordEncoder.matches(authRequestDTO.getPassword(),
@@ -37,13 +36,12 @@ public class AuthUserUseCase {
             throw new InvalidCredentialsException();
         }
 
-        var token = this.jwtProvider.generateToken(authUserDTO);
+        var token = this.jwtGenerate.generateToken(authUserDTO);
 
         return token;
     }
 
     private AuthUserDTO mapUser(AuthRequestDTO authRequestDTO){
-
         var authUserDTO = AuthUserDTO.builder()
                 .email(authRequestDTO.getEmail())
                 .build();

@@ -5,7 +5,7 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.DoctorRep
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientEntity;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientRepository;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.CreatePatientRequestDTO;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.CreatePatientResponseDTO;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.PatientResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ public class CreatePatientUseCase {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public CreatePatientResponseDTO execute(CreatePatientRequestDTO createPatientRequestDTO){
+    public PatientResponseDTO execute(CreatePatientRequestDTO createPatientRequestDTO){
 
         this.patientRepository.findByUsernameIgnoreCaseOrEmailIgnoreCase(createPatientRequestDTO.getUsername(),
                 createPatientRequestDTO.getEmail()).ifPresent(user -> {
@@ -44,7 +44,7 @@ public class CreatePatientUseCase {
 
         var savedPatient = this.patientRepository.save(patientEntity);
 
-        return CreatePatientResponseDTO.builder()
+        return PatientResponseDTO.builder()
                 .id(savedPatient.getId())
                 .name(savedPatient.getName())
                 .username(savedPatient.getUsername())
