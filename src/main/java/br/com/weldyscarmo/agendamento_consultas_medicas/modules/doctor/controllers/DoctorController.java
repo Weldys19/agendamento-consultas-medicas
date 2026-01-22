@@ -36,7 +36,7 @@ public class DoctorController {
     })
     @PostMapping("/")
     public ResponseEntity<CreateDoctorResponseDTO> create(@Valid @RequestBody CreateDoctorRequestDTO createDoctorRequestDTO){
-        var result = this.createDoctorUseCase.execute(createDoctorRequestDTO);
+        CreateDoctorResponseDTO result = this.createDoctorUseCase.execute(createDoctorRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 }

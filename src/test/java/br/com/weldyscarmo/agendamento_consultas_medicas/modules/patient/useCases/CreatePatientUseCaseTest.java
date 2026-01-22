@@ -4,6 +4,7 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.UserFoundExce
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientEntity;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientRepository;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.CreatePatientRequestDTO;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.PatientResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,14 +36,14 @@ public class CreatePatientUseCaseTest {
     @Test
     public void itShouldBePossibleToCreateAPatient(){
 
-        var patient = CreatePatientRequestDTO.builder()
+        CreatePatientRequestDTO patient = CreatePatientRequestDTO.builder()
                 .name("Weldys")
                 .email("weldyscarmo@gmail.com")
                 .username("WeldysdoCarmo")
                 .password("12345678910")
                 .build();
 
-        var patientIdGenerate = PatientEntity.builder()
+        PatientEntity patientIdGenerate = PatientEntity.builder()
                 .id(UUID.randomUUID())
                 .build();
 
@@ -54,7 +55,7 @@ public class CreatePatientUseCaseTest {
 
         when(this.passwordEncoder.encode(patient.getPassword())).thenReturn("hashPassword");
 
-        var result = this.createPatientUseCase.execute(patient);
+        PatientResponseDTO result = this.createPatientUseCase.execute(patient);
 
         assertThat(result.getId()).isEqualTo(patientIdGenerate.getId());
         verify(passwordEncoder).encode(any(String.class));
@@ -63,12 +64,12 @@ public class CreatePatientUseCaseTest {
     @Test
     public void itShouldNotBePossibleToCreateAPatient(){
 
-        var patient = CreatePatientRequestDTO.builder()
+        CreatePatientRequestDTO patient = CreatePatientRequestDTO.builder()
                 .email("weldyscarmo@gmail.com")
                 .username("WeldysdoCarmo")
                 .build();
 
-        var patientEntity = PatientEntity.builder()
+        PatientEntity patientEntity = PatientEntity.builder()
                 .email("weldyscarmo@gmail.com")
                 .username("WeldysdoCarmo")
                 .build();

@@ -4,6 +4,7 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.security.dtos.AuthUserDT
 import br.com.weldyscarmo.agendamento_consultas_medicas.security.dtos.TokenResponseDTO;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -12,12 +13,18 @@ import java.time.Instant;
 @Service
 public class JWTGenerate {
 
+    private String secret;
+
+    public JWTGenerate(@Value("${security.token.secret}") String secret){
+        this.secret = secret;
+    }
+
     public TokenResponseDTO generateToken(AuthUserDTO authUserDTO){
 
-        var expiresAt = Instant.now().plus(Duration.ofMinutes(15));
-        var algorithm = Algorithm.HMAC256("@Weldys2025");
+        Instant expiresAt = Instant.now().plus(Duration.ofMinutes(15));
+        Algorithm algorithm = Algorithm.HMAC256(secret);
 
-        var token = JWT.create().withIssuer("agendamento-medico")
+        String token = JWT.create().withIssuer("agendamento-medico")
                 .withSubject(authUserDTO.getId().toString())
                 .withClaim("roles", authUserDTO.getRoles())
                 .withExpiresAt(expiresAt)

@@ -1,5 +1,7 @@
 package br.com.weldyscarmo.agendamento_consultas_medicas.security;
 
+import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.InvalidTokenException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,20 +26,27 @@ public class SecurityFilterUser extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
         HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        var header = request.getHeader("Authorization");
+        String header = request.getHeader("Authorization");
 
         if (header != null){
-            var tokenDecoded = this.jwtProvider.validateToken(header.substring(7));
 
-            request.setAttribute("user_id", tokenDecoded.getSubject());
-            var roles = tokenDecoded.getClaim("roles").asString();
+            try {
+                DecodedJWT tokenDecoded = this.jwtProvider.validateToken(header.substring(7));
 
-            var permissions = new SimpleGrantedAuthority("ROLE_" + roles);
+                request.setAttribute("user_id", tokenDecoded.getSubject());
+                String roles = tokenDecoded.getClaim("roles").asString();
 
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    tokenDecoded.getSubject(), null, List.of(permissions)
-            );
-            SecurityContextHolder.getContext().setAuthentication(auth);
+                SimpleGrantedAuthority permissions = new SimpleGrantedAuthority("ROLE_" + roles);
+
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                        tokenDecoded.getSubject(), null, List.of(permissions)
+                );
+                SecurityContextHolder.getContext().setAuthentication(auth);
+
+            } catch (InvalidTokenException e){
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+            }
         }
         filterChain.doFilter(request, response);
     }

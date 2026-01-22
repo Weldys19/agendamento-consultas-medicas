@@ -27,22 +27,22 @@ public class AuthUserUseCase {
     private JWTGenerate jwtGenerate;
 
     public TokenResponseDTO execute(AuthRequestDTO authRequestDTO){
-        var authUserDTO = mapUser(authRequestDTO);
+        AuthUserDTO authUserDTO = mapUser(authRequestDTO);
 
-        var passwordMatchers = passwordEncoder.matches(authRequestDTO.getPassword(),
+        boolean passwordMatchers = passwordEncoder.matches(authRequestDTO.getPassword(),
                 authUserDTO.getPassword());
 
         if (!passwordMatchers){
             throw new InvalidCredentialsException();
         }
 
-        var token = this.jwtGenerate.generateToken(authUserDTO);
+        TokenResponseDTO token = this.jwtGenerate.generateToken(authUserDTO);
 
         return token;
     }
 
     private AuthUserDTO mapUser(AuthRequestDTO authRequestDTO){
-        var authUserDTO = AuthUserDTO.builder()
+        AuthUserDTO authUserDTO = AuthUserDTO.builder()
                 .email(authRequestDTO.getEmail())
                 .build();
 

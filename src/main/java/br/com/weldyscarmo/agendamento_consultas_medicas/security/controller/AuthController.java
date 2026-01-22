@@ -36,7 +36,7 @@ public class AuthController {
     })
     @PostMapping("/")
     public ResponseEntity<TokenResponseDTO> create(@RequestBody AuthRequestDTO authRequestDTO){
-        var result = this.authUserUseCase.execute(authRequestDTO);
+        TokenResponseDTO result = this.authUserUseCase.execute(authRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 }

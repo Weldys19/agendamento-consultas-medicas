@@ -42,7 +42,7 @@ public class PatientController {
     })
     @PostMapping("/")
     public ResponseEntity<Object> create(@Valid @RequestBody CreatePatientRequestDTO createPatientRequestDTO){
-        var result = this.createPatientUseCase.execute(createPatientRequestDTO);
+        PatientResponseDTO result = this.createPatientUseCase.execute(createPatientRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
@@ -51,8 +51,7 @@ public class PatientController {
     public ResponseEntity<PatientResponseDTO> update(HttpServletRequest request,
             @Valid @RequestBody UpdateDataPatientRequestDTO updateDataPatientRequestDTO){
 
-        var idPatient = UUID.fromString(request.getAttribute("user_id").toString());
-        var result = this.updateDataPatientUseCase.execute(updateDataPatientRequestDTO, idPatient);
+        PatientResponseDTO result = this.updateDataPatientUseCase.execute(updateDataPatientRequestDTO, request);
         return ResponseEntity.ok(result);
     }
 }

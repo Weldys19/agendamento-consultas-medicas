@@ -31,16 +31,16 @@ public class CreateDoctorUseCase {
             throw new UserFoundException();
         });
 
-        var hashPassword = passwordEncoder.encode(createDoctorRequestDTO.getPassword());
+        String hashPassword = passwordEncoder.encode(createDoctorRequestDTO.getPassword());
 
-        var doctorEntity = DoctorEntity.builder()
+        DoctorEntity doctorEntity = DoctorEntity.builder()
                 .name(createDoctorRequestDTO.getName())
                 .email(createDoctorRequestDTO.getEmail())
                 .specialty(createDoctorRequestDTO.getSpecialty())
                 .password(hashPassword)
                 .build();
 
-        var savedDoctor = this.doctorRepository.save(doctorEntity);
+        DoctorEntity savedDoctor = this.doctorRepository.save(doctorEntity);
 
         return CreateDoctorResponseDTO.builder()
                 .id(savedDoctor.getId())

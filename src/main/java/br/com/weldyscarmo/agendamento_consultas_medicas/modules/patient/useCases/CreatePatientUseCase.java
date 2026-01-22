@@ -33,16 +33,16 @@ public class CreatePatientUseCase {
             throw new UserFoundException();
         });
 
-        var hashPassword = passwordEncoder.encode(createPatientRequestDTO.getPassword());
+        String hashPassword = passwordEncoder.encode(createPatientRequestDTO.getPassword());
 
-        var patientEntity = PatientEntity.builder()
+        PatientEntity patientEntity = PatientEntity.builder()
                 .name(createPatientRequestDTO.getName())
                 .email(createPatientRequestDTO.getEmail())
                 .username(createPatientRequestDTO.getUsername())
                 .password(hashPassword)
                 .build();
 
-        var savedPatient = this.patientRepository.save(patientEntity);
+        PatientEntity savedPatient = this.patientRepository.save(patientEntity);
 
         return PatientResponseDTO.builder()
                 .id(savedPatient.getId())

@@ -4,6 +4,7 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.UserFoundExce
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.DoctorEntity;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.DoctorRepository;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.dtos.CreateDoctorRequestDTO;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.dtos.CreateDoctorResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,12 +36,12 @@ public class CreateDoctorUseCaseTest {
     @Test
     public void itShouldBePossibleToCreateADoctor(){
 
-        var doctorDTO = CreateDoctorRequestDTO.builder()
+        CreateDoctorRequestDTO doctorDTO = CreateDoctorRequestDTO.builder()
                 .email("weldys@gmail.com")
                 .password("1234567890")
                 .build();
 
-        var doctorIdGenerated = DoctorEntity.builder()
+        DoctorEntity doctorIdGenerated = DoctorEntity.builder()
                 .id(UUID.randomUUID())
                 .build();
 
@@ -52,7 +53,7 @@ public class CreateDoctorUseCaseTest {
 
         when(this.doctorRepository.save(any(DoctorEntity.class))).thenReturn(doctorIdGenerated);
 
-        var result = this.createDoctorUseCase.execute(doctorDTO);
+        CreateDoctorResponseDTO result = this.createDoctorUseCase.execute(doctorDTO);
 
         assertThat(result.getId()).isEqualTo(doctorIdGenerated.getId());
         verify(passwordEncoder).encode(any(String.class));
@@ -61,12 +62,12 @@ public class CreateDoctorUseCaseTest {
     @Test
     public void itShouldNotBePossibleToCreateADoctor(){
 
-        var doctorDTO = CreateDoctorRequestDTO.builder()
+        CreateDoctorRequestDTO doctorDTO = CreateDoctorRequestDTO.builder()
                 .email("weldys@gmail.com")
                 .password("1234567890")
                 .build();
 
-        var doctorEntity = DoctorEntity.builder()
+        DoctorEntity doctorEntity = DoctorEntity.builder()
                 .email("weldys@gmail.com")
                 .password("1234567890")
                 .build();

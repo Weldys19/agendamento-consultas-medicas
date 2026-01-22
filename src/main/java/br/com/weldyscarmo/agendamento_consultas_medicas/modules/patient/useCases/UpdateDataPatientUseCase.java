@@ -5,6 +5,7 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientE
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientRepository;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.PatientResponseDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.UpdateDataPatientRequestDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +17,12 @@ public class UpdateDataPatientUseCase {
     @Autowired
     private PatientRepository patientRepository;
 
-    public PatientResponseDTO execute(UpdateDataPatientRequestDTO updateDataPatientRequestDTO, UUID idPatient){
+    public PatientResponseDTO execute(UpdateDataPatientRequestDTO updateDataPatientRequestDTO,
+                                      HttpServletRequest request){
 
-        var patientEntity = this.patientRepository.findById(idPatient).
+        UUID idPatient = UUID.fromString(request.getAttribute("user_id").toString());
+
+        PatientEntity patientEntity = this.patientRepository.findById(idPatient).
                 orElseThrow(() -> {
                     throw new UserNotFoundException();
                 });

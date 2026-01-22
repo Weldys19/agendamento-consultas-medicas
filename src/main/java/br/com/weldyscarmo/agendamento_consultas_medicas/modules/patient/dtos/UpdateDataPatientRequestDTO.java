@@ -1,6 +1,5 @@
 package br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 

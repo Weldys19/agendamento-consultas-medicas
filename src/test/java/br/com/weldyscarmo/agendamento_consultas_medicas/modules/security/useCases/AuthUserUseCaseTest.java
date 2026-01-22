@@ -47,18 +47,18 @@ public class AuthUserUseCaseTest {
     @Test
     public void itShouldBePossibleToAuthenticateThePatient(){
 
-        var patientEntity = PatientEntity.builder()
+        PatientEntity patientEntity = PatientEntity.builder()
                 .id(UUID.randomUUID())
                 .email("weldys@gmail.com")
                 .password("hashPassword")
                 .build();
 
-        var authRequestDTO = AuthRequestDTO.builder()
+        AuthRequestDTO authRequestDTO = AuthRequestDTO.builder()
                 .email("weldys@gmail.com")
                 .password("12345678910")
                 .build();
 
-        var token = TokenResponseDTO.builder()
+        TokenResponseDTO token = TokenResponseDTO.builder()
                 .token("token")
                 .expiresAt(12345667L)
                 .build();
@@ -75,7 +75,7 @@ public class AuthUserUseCaseTest {
         when(this.jwtGenerate.generateToken(any(AuthUserDTO.class)))
                 .thenReturn(token);
 
-        var result = this.authUserUseCase.execute(authRequestDTO);
+        TokenResponseDTO result = this.authUserUseCase.execute(authRequestDTO);
 
         assertNotNull(result);
         assertThat(result.getToken()).isEqualTo(token.getToken());
@@ -84,18 +84,18 @@ public class AuthUserUseCaseTest {
     @Test
     public void itShouldBePossibleToAuthenticateTheDoctor(){
 
-        var doctorEntity = DoctorEntity.builder()
+        DoctorEntity doctorEntity = DoctorEntity.builder()
                 .id(UUID.randomUUID())
                 .email("weldys@gmail.com")
                 .password("hashPassword")
                 .build();
 
-        var authRequestDTO = AuthRequestDTO.builder()
+        AuthRequestDTO authRequestDTO = AuthRequestDTO.builder()
                 .email("weldys@gmail.com")
                 .password("12345678910")
                 .build();
 
-        var token = TokenResponseDTO.builder()
+        TokenResponseDTO token = TokenResponseDTO.builder()
                 .token("token")
                 .expiresAt(1L)
                 .build();
@@ -112,7 +112,7 @@ public class AuthUserUseCaseTest {
         when(this.jwtGenerate.generateToken(any(AuthUserDTO.class)))
                 .thenReturn(token);
 
-        var result = this.authUserUseCase.execute(authRequestDTO);
+        TokenResponseDTO result = this.authUserUseCase.execute(authRequestDTO);
 
         assertNotNull(result);
         assertThat(result.getToken()).isEqualTo(token.getToken());
@@ -122,7 +122,7 @@ public class AuthUserUseCaseTest {
     @Test
     public void shouldThrowExceptionWhenEmailDoesNotExist(){
 
-        var authRequestDTO = AuthRequestDTO.builder()
+        AuthRequestDTO authRequestDTO = AuthRequestDTO.builder()
                 .email("weldys@gmail.com")
                 .password("12345678910")
                 .build();
@@ -140,13 +140,13 @@ public class AuthUserUseCaseTest {
     @Test
     public void shouldThrowExceptionWhenPasswordIsInvalid(){
 
-        var doctorEntity = DoctorEntity.builder()
+        DoctorEntity doctorEntity = DoctorEntity.builder()
                 .id(UUID.randomUUID())
                 .email("weldys@gmail.com")
                 .password("hashPassword")
                 .build();
 
-        var authRequestDTO = AuthRequestDTO.builder()
+        AuthRequestDTO authRequestDTO = AuthRequestDTO.builder()
                 .email("weldys@gmail.com")
                 .password("12345678910")
                 .build();
