@@ -18,9 +18,7 @@ public class UpdateDataPatientUseCase {
     private PatientRepository patientRepository;
 
     public PatientResponseDTO execute(UpdateDataPatientRequestDTO updateDataPatientRequestDTO,
-                                      HttpServletRequest request){
-
-        UUID idPatient = UUID.fromString(request.getAttribute("user_id").toString());
+                                      UUID idPatient){
 
         PatientEntity patientEntity = this.patientRepository.findById(idPatient).
                 orElseThrow(() -> {

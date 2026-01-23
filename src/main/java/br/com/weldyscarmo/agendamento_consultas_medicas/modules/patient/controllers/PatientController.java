@@ -60,7 +60,9 @@ public class PatientController {
     public ResponseEntity<PatientResponseDTO> update(HttpServletRequest request,
             @Valid @RequestBody UpdateDataPatientRequestDTO updateDataPatientRequestDTO){
 
-        PatientResponseDTO result = this.updateDataPatientUseCase.execute(updateDataPatientRequestDTO, request);
+        UUID idPatient = UUID.fromString(request.getAttribute("user_id").toString());
+
+        PatientResponseDTO result = this.updateDataPatientUseCase.execute(updateDataPatientRequestDTO, idPatient);
         return ResponseEntity.ok(result);
     }
 }

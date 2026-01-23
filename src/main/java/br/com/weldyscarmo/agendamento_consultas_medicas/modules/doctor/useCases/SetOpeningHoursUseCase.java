@@ -1,6 +1,7 @@
 package br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.useCases;
 
-import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.InvalidDayException;
+import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.InvalidScheduleException;
+import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.OverlappingSchedulesException;
 import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.UserNotFoundException;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.DoctorEntity;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.DoctorRepository;
@@ -12,7 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.DayOfWeek;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -25,25 +26,22 @@ public class SetOpeningHoursUseCase {
     @Autowired
     private DoctorRepository doctorRepository;
 
-    public DoctorScheduleResponseDTO execute(HttpServletRequest request, CreateDoctorScheduleRequestDTO createDoctorScheduleRequestDTO){
-
-        UUID doctorId = UUID.fromString(request.getAttribute("user_id").toString());
+    public DoctorScheduleResponseDTO execute(UUID doctorId, CreateDoctorScheduleRequestDTO createDoctorScheduleRequestDTO){
 
         DoctorEntity doctorEntity = this.doctorRepository.findById(doctorId).orElseThrow(() -> {
             throw new UserNotFoundException();
         });
 
-        if (!(createDoctorScheduleRequestDTO.getDayOfWeek() instanceof DayOfWeek)){
-            throw new InvalidDayException();
-        }
         if (createDoctorScheduleRequestDTO.getStartTime().
                 isAfter(createDoctorScheduleRequestDTO.getEndTime())){
-            throw new IllegalArgumentException("O horário inical não pode ser menor que o horário final");
+            throw new InvalidScheduleException();
         }
+
+        //Valida se tem sobreposição de horário
+        schedulingConflict(createDoctorScheduleRequestDTO, doctorId);
 
         DoctorScheduleEntity doctorScheduleEntity = DoctorScheduleEntity.builder()
                 .doctorId(doctorEntity.getId())
-                .doctorEntity(doctorEntity)
                 .dayOfWeek(createDoctorScheduleRequestDTO.getDayOfWeek())
                 .startTime(createDoctorScheduleRequestDTO.getStartTime())
                 .endTime(createDoctorScheduleRequestDTO.getEndTime())
@@ -54,10 +52,22 @@ public class SetOpeningHoursUseCase {
         return DoctorScheduleResponseDTO.builder()
                 .id(result.getId())
                 .doctorId(result.getDoctorId())
-                .doctorEntity(result.getDoctorEntity())
                 .dayOfWeek(result.getDayOfWeek())
                 .startTime(result.getStartTime())
                 .endTime(result.getEndTime())
                 .build();
+    }
+
+    private void schedulingConflict(CreateDoctorScheduleRequestDTO createDoctorScheduleRequestDTO, UUID doctorId){
+
+        List<DoctorScheduleEntity> doctorSchedule = this.doctorScheduleRepository.findAllByDoctorId(doctorId);
+
+        doctorSchedule.forEach(doctorScheduleEntity -> {
+            if (createDoctorScheduleRequestDTO.getDayOfWeek() == doctorScheduleEntity.getDayOfWeek()
+            && createDoctorScheduleRequestDTO.getStartTime().isBefore(doctorScheduleEntity.getEndTime())
+            && createDoctorScheduleRequestDTO.getEndTime().isAfter(doctorScheduleEntity.getStartTime())){
+                throw new OverlappingSchedulesException();
+            }
+        });
     }
 }

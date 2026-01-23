@@ -4,6 +4,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -46,8 +48,18 @@ public class ExceptionHandlerController {
         return ResponseEntity.badRequest().body(e.getMessage());
     }
 
-    @ExceptionHandler(InvalidDayException.class)
-    public ResponseEntity<String> handlerInvalidDayException(InvalidDayException e){
+    @ExceptionHandler(InvalidScheduleException.class)
+    public ResponseEntity<String> handlerInvalidScheduleException(InvalidScheduleException e){
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorMessageDTO> handlerHttpMessageNotReadableException(HttpMessageNotReadableException e){
+        return ResponseEntity.badRequest().body(new ErrorMessageDTO("dayOfweek", "Dia da semana inválido"));
+    }
+
+    @ExceptionHandler(OverlappingSchedulesException.class)
+    public ResponseEntity<String> handlerOverlappingSchedulesException(OverlappingSchedulesException e){
         return ResponseEntity.badRequest().body(e.getMessage());
     }
 }

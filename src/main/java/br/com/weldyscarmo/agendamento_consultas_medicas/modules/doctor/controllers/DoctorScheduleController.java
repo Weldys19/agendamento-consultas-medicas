@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/doctor")
 public class DoctorScheduleController {
@@ -25,7 +27,9 @@ public class DoctorScheduleController {
     public ResponseEntity<DoctorScheduleResponseDTO> create(HttpServletRequest request,
                         @RequestBody CreateDoctorScheduleRequestDTO createDoctorScheduleRequestDTO){
 
-        DoctorScheduleResponseDTO result = this.setOpeningHoursUseCase.execute(request, createDoctorScheduleRequestDTO);
+        UUID doctorId = UUID.fromString(request.getAttribute("user_id").toString());
+
+        DoctorScheduleResponseDTO result = this.setOpeningHoursUseCase.execute(doctorId, createDoctorScheduleRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 }
