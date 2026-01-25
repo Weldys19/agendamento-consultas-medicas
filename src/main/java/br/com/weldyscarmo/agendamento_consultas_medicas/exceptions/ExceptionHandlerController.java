@@ -5,7 +5,6 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -61,6 +60,21 @@ public class ExceptionHandlerController {
 
     @ExceptionHandler(OverlappingSchedulesException.class)
     public ResponseEntity<String> handlerOverlappingSchedulesException(OverlappingSchedulesException e){
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidAppointmentDayException.class)
+    public ResponseEntity<String> handlerInvalidAppointmentException(InvalidAppointmentDayException e){
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+
+    @ExceptionHandler(UnavailableScheduleException.class)
+    public ResponseEntity<String> handlerUnavailableScheduleException(UnavailableScheduleException e){
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidAppointmentHourException.class)
+    public ResponseEntity<String> handlerInvalidAppointmentHourException(InvalidAppointmentHourException e){
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 }
