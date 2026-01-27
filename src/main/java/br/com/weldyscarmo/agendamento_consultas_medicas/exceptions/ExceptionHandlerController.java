@@ -77,4 +77,9 @@ public class ExceptionHandlerController {
     public ResponseEntity<String> handlerInvalidAppointmentHourException(InvalidAppointmentHourException e){
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
+
+    @ExceptionHandler(InvalidDateException.class)
+    public ResponseEntity<String> handlerInvalidDateException(InvalidDateException e){
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
 }

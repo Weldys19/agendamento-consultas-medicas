@@ -63,8 +63,8 @@ public class SetOpeningHoursUseCase {
 
         doctorSchedule.forEach(doctorScheduleEntity -> {
             if (createDoctorScheduleRequestDTO.getDayOfWeek() == doctorScheduleEntity.getDayOfWeek()
-            && createDoctorScheduleRequestDTO.getStartTime().isBefore(doctorScheduleEntity.getEndTime())
-            && createDoctorScheduleRequestDTO.getEndTime().isAfter(doctorScheduleEntity.getStartTime())){
+            && !createDoctorScheduleRequestDTO.getStartTime().isAfter(doctorScheduleEntity.getEndTime())
+            && !createDoctorScheduleRequestDTO.getEndTime().isBefore(doctorScheduleEntity.getStartTime())){
                 throw new OverlappingSchedulesException();
             }
         });

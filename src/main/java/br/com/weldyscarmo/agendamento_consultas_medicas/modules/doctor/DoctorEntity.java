@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity(name = "doctor")
@@ -25,9 +26,10 @@ public class DoctorEntity {
     private UUID id;
 
     private String name;
-    private String specialty;
     private String email;
     private String password;
+    private String specialty;
+    private Long consultationDurationInMinutes;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

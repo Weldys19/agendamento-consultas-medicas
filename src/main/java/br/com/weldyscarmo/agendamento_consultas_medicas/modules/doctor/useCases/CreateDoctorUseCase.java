@@ -37,6 +37,7 @@ public class CreateDoctorUseCase {
                 .name(createDoctorRequestDTO.getName())
                 .email(createDoctorRequestDTO.getEmail())
                 .specialty(createDoctorRequestDTO.getSpecialty())
+                .consultationDurationInMinutes(createDoctorRequestDTO.getConsultationDurationInMinutes())
                 .password(hashPassword)
                 .build();
 
@@ -47,6 +48,7 @@ public class CreateDoctorUseCase {
                 .name(savedDoctor.getName())
                 .email(savedDoctor.getEmail())
                 .specialty(savedDoctor.getSpecialty())
+                .consultationDurationInMinutes(savedDoctor.getConsultationDurationInMinutes())
                 .createdAt(savedDoctor.getCreatedAt())
                 .build();
     }

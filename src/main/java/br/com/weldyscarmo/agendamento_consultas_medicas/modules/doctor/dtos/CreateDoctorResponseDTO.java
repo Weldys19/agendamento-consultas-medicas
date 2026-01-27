@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Data
@@ -17,6 +18,7 @@ public class CreateDoctorResponseDTO {
     private UUID id;
     private String name;
     private String specialty;
+    private Long consultationDurationInMinutes;
     private String email;
     private LocalDateTime createdAt;
 }

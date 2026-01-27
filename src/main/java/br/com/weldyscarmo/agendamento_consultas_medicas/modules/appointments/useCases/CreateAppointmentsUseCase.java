@@ -1,10 +1,7 @@
 package br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.useCases;
 
 import br.com.weldyscarmo.agendamento_consultas_medicas.enums.AppointmentsStatus;
-import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.InvalidAppointmentDayException;
-import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.InvalidAppointmentHourException;
-import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.UnavailableScheduleException;
-import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.UserNotFoundException;
+import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.*;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.AppointmentsEntity;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.AppointmentsRepository;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.CreateAppointmentsRequestDTO;
@@ -18,7 +15,7 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientR
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,10 +38,6 @@ public class CreateAppointmentsUseCase {
 
     public CreateAppointmentsResponseDTO execute(UUID patientId, UUID doctorId, CreateAppointmentsRequestDTO createAppointmentsRequestDTO){
 
-        LocalTime endTime = createAppointmentsRequestDTO.getStartTime().plusHours(1);
-
-        DayOfWeek day = createAppointmentsRequestDTO.getDate().getDayOfWeek();
-
         PatientEntity patientEntity = this.patientRepository.findById(patientId).orElseThrow(() -> {
             throw new UserNotFoundException();
         });
@@ -52,12 +45,19 @@ public class CreateAppointmentsUseCase {
             throw new UserNotFoundException();
         });
 
-        List<DoctorScheduleEntity> schedule = doctorAvailable(doctorId, createAppointmentsRequestDTO);
-        List<AppointmentsEntity> appointmentsDoctor = this.appointmentsRepository.findAllByDoctorIdAndDay(doctorId,
-                day);
+        if (createAppointmentsRequestDTO.getDate().isBefore(LocalDate.now())){
+            throw new InvalidDateException();
+        }
+
+        LocalTime endTime = createAppointmentsRequestDTO.getStartTime().plusMinutes(doctorEntity.getConsultationDurationInMinutes());
+
+        List<DoctorScheduleEntity> schedules = doctorAvailable(doctorId, createAppointmentsRequestDTO);
+
+        List<AppointmentsEntity> appointmentsDoctor = this.appointmentsRepository.findAllByDoctorIdAndDate(doctorId,
+                createAppointmentsRequestDTO.getDate());
 
         boolean invalidSchedule = true;
-        for (DoctorScheduleEntity scheduleEntity : schedule){
+        for (DoctorScheduleEntity scheduleEntity : schedules){
             if (!createAppointmentsRequestDTO.getStartTime().isBefore(scheduleEntity.getStartTime())
         && !endTime.isAfter(scheduleEntity.getEndTime())){
                 invalidSchedule = false;
@@ -102,13 +102,13 @@ public class CreateAppointmentsUseCase {
     }
 
     private List<DoctorScheduleEntity> doctorAvailable(UUID doctorId,
-                                                 CreateAppointmentsRequestDTO createAppointmentsRequestDTO) {
+                                                       CreateAppointmentsRequestDTO createAppointmentsRequestDTO) {
 
         List<DoctorScheduleEntity> doctorSchedule = this.doctorScheduleRepository.findAllByDoctorId(doctorId);
         List<DoctorScheduleEntity> dailySchedules = new ArrayList<>();
 
         for (DoctorScheduleEntity schedule : doctorSchedule) {
-            if (createAppointmentsRequestDTO.getDate().getDayOfWeek() == schedule.getDayOfWeek()) {
+            if (createAppointmentsRequestDTO.getDate().getDayOfWeek().equals(schedule.getDayOfWeek())) {
                 dailySchedules.add(schedule);
             }
         }
