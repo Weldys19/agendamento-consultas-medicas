@@ -72,8 +72,7 @@ public class CreateAppointmentsUseCase {
         for (AppointmentsEntity appointments : appointmentsDoctor) {
             if (createAppointmentsRequestDTO.getStartTime().isBefore(appointments.getEndTime())
                     && endTime.isAfter(appointments.getStartTime())
-            && appointments.getStatus().equals(AppointmentsStatus.SCHEDULED)
-            && appointments.getDate().isEqual(createAppointmentsRequestDTO.getDate())){
+            && appointments.getStatus().equals(AppointmentsStatus.SCHEDULED)){
                 throw new UnavailableScheduleException();
             }
         }
