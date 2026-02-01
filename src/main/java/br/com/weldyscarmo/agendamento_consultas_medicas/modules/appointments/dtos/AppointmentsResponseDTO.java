@@ -1,13 +1,11 @@
 package br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos;
 
 import br.com.weldyscarmo.agendamento_consultas_medicas.enums.AppointmentsStatus;
-import jdk.jfr.Name;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -17,7 +15,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateAppointmentsResponseDTO {
+public class AppointmentsResponseDTO {
 
     private UUID id;
     private UUID patientId;

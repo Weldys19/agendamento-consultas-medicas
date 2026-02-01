@@ -3,7 +3,7 @@ package br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments;
 import br.com.weldyscarmo.agendamento_consultas_medicas.enums.AppointmentsStatus;
 import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.*;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.CreateAppointmentsRequestDTO;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.CreateAppointmentsResponseDTO;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.AppointmentsResponseDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.useCases.CreateAppointmentsUseCase;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.DoctorEntity;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.DoctorRepository;
@@ -117,7 +117,7 @@ public class CreateAppointmentsUseCaseTest {
                     when(appointmentsRepository.save(any(AppointmentsEntity.class)))
                             .thenReturn(appointmentsEntity);
 
-                    CreateAppointmentsResponseDTO result = createAppointmentsUseCase.execute
+                    AppointmentsResponseDTO result = createAppointmentsUseCase.execute
                             (patientEntity.getId(), doctorEntity.getId(), appointmentsRequestDTO);
 
                     assertThat(result.getPatientId()).isEqualTo(patientEntity.getId());

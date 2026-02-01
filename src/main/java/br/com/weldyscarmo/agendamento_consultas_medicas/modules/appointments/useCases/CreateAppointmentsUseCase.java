@@ -5,7 +5,7 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.*;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.AppointmentsEntity;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.AppointmentsRepository;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.CreateAppointmentsRequestDTO;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.CreateAppointmentsResponseDTO;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.AppointmentsResponseDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.DoctorEntity;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.DoctorRepository;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.DoctorScheduleEntity;
@@ -15,7 +15,7 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientR
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class CreateAppointmentsUseCase {
     @Autowired
     private DoctorScheduleRepository doctorScheduleRepository;
 
-    public CreateAppointmentsResponseDTO execute(UUID patientId, UUID doctorId, CreateAppointmentsRequestDTO createAppointmentsRequestDTO){
+    public AppointmentsResponseDTO execute(UUID patientId, UUID doctorId, CreateAppointmentsRequestDTO createAppointmentsRequestDTO){
 
         PatientEntity patientEntity = this.patientRepository.findById(patientId).orElseThrow(() -> {
             throw new UserNotFoundException();
@@ -45,7 +45,10 @@ public class CreateAppointmentsUseCase {
             throw new UserNotFoundException();
         });
 
-        if (createAppointmentsRequestDTO.getDate().isBefore(LocalDate.now())){
+        LocalDateTime dateConsultation = createAppointmentsRequestDTO.getDate()
+                .atTime(createAppointmentsRequestDTO.getStartTime());
+
+        if (dateConsultation.isBefore(LocalDateTime.now())){
             throw new InvalidDateException();
         }
 
@@ -88,7 +91,7 @@ public class CreateAppointmentsUseCase {
 
         AppointmentsEntity saved = this.appointmentsRepository.save(appointmentsEntity);
 
-        return CreateAppointmentsResponseDTO.builder()
+        return AppointmentsResponseDTO.builder()
                 .id(saved.getId())
                 .patientId(saved.getPatientId())
                 .doctorId(saved.getDoctorId())

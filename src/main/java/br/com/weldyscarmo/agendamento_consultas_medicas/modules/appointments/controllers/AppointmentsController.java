@@ -1,8 +1,10 @@
 package br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.controllers;
 
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.AppointmentsEntity;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.CreateAppointmentsRequestDTO;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.CreateAppointmentsResponseDTO;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.AppointmentsResponseDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.useCases.CreateAppointmentsUseCase;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.useCases.DoctorAppointmentsOnTheDayUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,21 +18,25 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/patient")
+@RequestMapping("/appointments")
 @Tag(name = "Agendamento de consultas")
 public class AppointmentsController {
 
     @Autowired
     private CreateAppointmentsUseCase createAppointmentsUseCase;
 
+    @Autowired
+    private DoctorAppointmentsOnTheDayUseCase doctorAppointmentsOnTheDayUseCase;
+
     @Operation(summary = "Agendar consultas",
             description = "Essa função é responsável por agendar novas consultas")
     @ApiResponses({
             @ApiResponse(responseCode = "201", content = {
-                    @Content(schema = @Schema(implementation = CreateAppointmentsResponseDTO.class))
+                    @Content(schema = @Schema(implementation = AppointmentsResponseDTO.class))
             }),
 
             @ApiResponse(responseCode = "404", description = "Usuário não existe", content = {
@@ -41,15 +47,24 @@ public class AppointmentsController {
                     @Content(schema = @Schema(implementation = String.class))
             }),
     })
-    @PostMapping("/appointment/{doctorId}")
+    @PostMapping("/patient/{doctorId}")
     @PreAuthorize("hasRole('PATIENT')")
-    public ResponseEntity<CreateAppointmentsResponseDTO> create(@RequestBody CreateAppointmentsRequestDTO createAppointmentsRequestDTO,
-                                                     HttpServletRequest request, @PathVariable UUID doctorId){
+    public ResponseEntity<AppointmentsResponseDTO> create(@RequestBody CreateAppointmentsRequestDTO createAppointmentsRequestDTO,
+                                                          HttpServletRequest request, @PathVariable UUID doctorId){
         UUID patientId = UUID.fromString(request.getAttribute("user_id").toString());
 
-        CreateAppointmentsResponseDTO result = this.createAppointmentsUseCase.execute(patientId, doctorId,
+        AppointmentsResponseDTO result = this.createAppointmentsUseCase.execute(patientId, doctorId,
                 createAppointmentsRequestDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
+    @GetMapping("/doctor")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<List<AppointmentsResponseDTO>> listAppointments(HttpServletRequest request){
+
+        UUID doctorId = UUID.fromString(request.getAttribute("user_id").toString());
+        List<AppointmentsResponseDTO> result = this.doctorAppointmentsOnTheDayUseCase.execute(doctorId);
+        return ResponseEntity.ok(result);
     }
 }
