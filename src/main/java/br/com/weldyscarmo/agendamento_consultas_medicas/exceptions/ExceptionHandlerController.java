@@ -34,7 +34,7 @@ public class ExceptionHandlerController {
 
     @ExceptionHandler(UserFoundException.class)
     public ResponseEntity<String> handlerUserFoundException(UserFoundException e){
-        return ResponseEntity.badRequest().body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
@@ -49,7 +49,7 @@ public class ExceptionHandlerController {
 
     @ExceptionHandler(InvalidScheduleException.class)
     public ResponseEntity<String> handlerInvalidScheduleException(InvalidScheduleException e){
-        return ResponseEntity.badRequest().body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -91,5 +91,15 @@ public class ExceptionHandlerController {
     @ExceptionHandler(TimeNotFoundException.class)
     public ResponseEntity<String> handlerTimeNotFoundException(TimeNotFoundException e){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
+    @ExceptionHandler(AppointmentNotFoundException.class)
+    public ResponseEntity<String> handlerAppointmentNotFoundException(AppointmentNotFoundException e){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCancellationException.class)
+    public ResponseEntity<String> handlerInvalidCancellationException(InvalidCancellationException e){
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 }

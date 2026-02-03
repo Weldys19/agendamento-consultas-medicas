@@ -1,11 +1,8 @@
 package br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.controllers;
 
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.AppointmentsEntity;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.CreateAppointmentsRequestDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.AppointmentsResponseDTO;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.useCases.CreateAppointmentsUseCase;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.useCases.DoctorAppointmentsOnTheDayUseCase;
-import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.useCases.PatientAppointmentsUseCase;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.useCases.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,8 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,6 +36,12 @@ public class AppointmentsController {
     @Autowired
     private PatientAppointmentsUseCase patientAppointmentsUseCase;
 
+    @Autowired
+    private SetStatusToFinishedUseCase setStatusToFinishedUseCase;
+
+    @Autowired
+    private CancelAppointment cancelAppointment;
+
     @Operation(summary = "Agendar consultas",
             description = "Essa função é responsável por agendar novas consultas")
     @ApiResponses({
@@ -51,7 +57,7 @@ public class AppointmentsController {
                     @Content(schema = @Schema(implementation = String.class))
             }),
     })
-    @PostMapping("/patient/{doctorId}")
+    @PostMapping("/{doctorId}")
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<AppointmentsResponseDTO> create(@RequestBody CreateAppointmentsRequestDTO createAppointmentsRequestDTO,
                                                           HttpServletRequest request, @PathVariable UUID doctorId){
@@ -78,6 +84,31 @@ public class AppointmentsController {
 
         UUID patientId = UUID.fromString(request.getAttribute("user_id").toString());
         List<AppointmentsResponseDTO> result = this.patientAppointmentsUseCase.execute(patientId);
+        return ResponseEntity.ok(result);
+    }
+
+    @PatchMapping("/{id}/finish")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<AppointmentsResponseDTO> setFinished(HttpServletRequest request, @PathVariable UUID id){
+
+        UUID doctorId = UUID.fromString(request.getAttribute("user_id").toString());
+        AppointmentsResponseDTO result = this.setStatusToFinishedUseCase.execute(doctorId, id);
+        return ResponseEntity.ok(result);
+    }
+
+    @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT')")
+    public ResponseEntity<AppointmentsResponseDTO> setCanceled(HttpServletRequest request, @PathVariable UUID id){
+
+        UUID userId = UUID.fromString(request.getAttribute("user_id").toString());
+
+        Collection<? extends GrantedAuthority> authorities = SecurityContextHolder.getContext()
+                .getAuthentication().getAuthorities();
+
+        List<GrantedAuthority> roles = List.copyOf(authorities);
+        String role = roles.getFirst().getAuthority();
+
+        AppointmentsResponseDTO result = this.cancelAppointment.execute(role, userId, id);
         return ResponseEntity.ok(result);
     }
 }
