@@ -6,6 +6,7 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientE
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientRepository;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.CreatePatientRequestDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.PatientResponseDTO;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,56 +38,54 @@ public class CreatePatientUseCaseTest {
     @Mock
     private DoctorRepository doctorRepository;
 
+    CreatePatientRequestDTO createPatientRequestDTO;
+    PatientEntity patientEntity;
+
+    @BeforeEach
+    void setup(){
+        createPatientRequestDTO = builderCreatePatientRequest();
+        patientEntity = PatientEntity.builder()
+                .id(UUID.randomUUID())
+                .build();
+    }
+
     @Test
     public void itShouldBePossibleToCreateAPatient(){
 
-        CreatePatientRequestDTO patient = CreatePatientRequestDTO.builder()
-                .name("Weldys")
-                .email("weldyscarmo@gmail.com")
-                .username("WeldysdoCarmo")
-                .password("12345678910")
-                .build();
+        when(this.patientRepository.findByUsernameIgnoreCaseOrEmailIgnoreCase(createPatientRequestDTO.getUsername(),
+                createPatientRequestDTO.getEmail())).thenReturn(Optional.empty());
 
-        PatientEntity patientIdGenerate = PatientEntity.builder()
-                .id(UUID.randomUUID())
-                .build();
-
-
-        when(this.patientRepository.findByUsernameIgnoreCaseOrEmailIgnoreCase(patient.getUsername(),
-                patient.getEmail())).thenReturn(Optional.empty());
-
-        when(this.doctorRepository.findByEmailIgnoreCase(patient.getEmail()))
+        when(this.doctorRepository.findByEmailIgnoreCase(createPatientRequestDTO.getEmail()))
                 .thenReturn(Optional.empty());
 
-        when(this.patientRepository.save(any(PatientEntity.class))).thenReturn(patientIdGenerate);
+        when(this.passwordEncoder.encode(createPatientRequestDTO.getPassword())).thenReturn("hashPassword");
 
-        when(this.passwordEncoder.encode(patient.getPassword())).thenReturn("hashPassword");
+        when(this.patientRepository.save(any(PatientEntity.class))).thenReturn(patientEntity);
 
-        PatientResponseDTO result = this.createPatientUseCase.execute(patient);
+        PatientResponseDTO result = this.createPatientUseCase.execute(createPatientRequestDTO);
 
-        assertThat(result.getId()).isEqualTo(patientIdGenerate.getId());
+        assertThat(result.getId()).isEqualTo(patientEntity.getId());
+        verify(patientRepository).save(any(PatientEntity.class));
         verify(passwordEncoder).encode(any(String.class));
     }
 
     @Test
     public void itShouldNotBePossibleToCreateAPatient(){
 
-        CreatePatientRequestDTO patient = CreatePatientRequestDTO.builder()
-                .email("weldyscarmo@gmail.com")
-                .username("WeldysdoCarmo")
-                .build();
+        when(this.patientRepository.findByUsernameIgnoreCaseOrEmailIgnoreCase(createPatientRequestDTO.getUsername(),
+                createPatientRequestDTO.getEmail())).thenReturn(Optional.of(patientEntity));
 
-        PatientEntity patientEntity = PatientEntity.builder()
-                .email("weldyscarmo@gmail.com")
-                .username("WeldysdoCarmo")
-                .build();
-
-        when(this.patientRepository.findByUsernameIgnoreCaseOrEmailIgnoreCase(patient.getUsername(),
-                patient.getEmail())).thenReturn(Optional.of(patientEntity));
-
-        assertThrows(UserFoundException.class, () -> {
-           createPatientUseCase.execute(patient);
-        });
+        assertThatThrownBy(() -> {
+           createPatientUseCase.execute(createPatientRequestDTO);
+        }).isInstanceOf(UserFoundException.class);
     }
 
+    private CreatePatientRequestDTO builderCreatePatientRequest() {
+        return CreatePatientRequestDTO.builder()
+                .name("Weldys")
+                .email("weldyscarmo@gmail.com")
+                .username("WeldysdoCarmo")
+                .password("12345678910")
+                .build();
+    }
 }

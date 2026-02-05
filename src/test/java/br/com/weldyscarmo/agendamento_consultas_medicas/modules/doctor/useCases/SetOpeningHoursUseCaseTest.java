@@ -86,8 +86,7 @@ public class SetOpeningHoursUseCaseTest {
         @Test
         public void shouldThrowExceptionWhenStartTimeIsAfterEndTime() {
 
-             dto = builderCreateDoctorSchedule(
-                    DayOfWeek.MONDAY, LocalTime.of(15,0), LocalTime.of(9, 0));
+             dto.setStartTime(LocalTime.of(19, 0));
 
             assertThatThrownBy(() -> {
                 setOpeningHoursUseCase.execute(doctorId, dto);

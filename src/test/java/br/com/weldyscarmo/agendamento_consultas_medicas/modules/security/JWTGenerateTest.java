@@ -14,20 +14,20 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class JWTGenerateTest {
 
-    private JWTGenerate jwtGenerate;
+    JWTGenerate jwtGenerate;
+    AuthUserDTO authUserDTO;
 
     @BeforeEach
     public void setup(){
         jwtGenerate = new JWTGenerate("secret");
+        authUserDTO = AuthUserDTO.builder()
+                .id(UUID.randomUUID())
+                .roles("roles")
+                .build();
     }
 
     @Test
     public void itShouldBePossibleToGenerateAToken(){
-
-        AuthUserDTO authUserDTO = AuthUserDTO.builder()
-                .id(UUID.randomUUID())
-                .roles("roles")
-                .build();
 
         TokenResponseDTO token = jwtGenerate.generateToken(authUserDTO);
 

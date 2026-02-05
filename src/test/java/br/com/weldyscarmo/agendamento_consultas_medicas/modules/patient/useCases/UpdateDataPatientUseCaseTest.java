@@ -5,6 +5,8 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientE
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientRepository;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.PatientResponseDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.UpdateDataPatientRequestDTO;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,84 +30,76 @@ public class UpdateDataPatientUseCaseTest {
     @Mock
     private PatientRepository patientRepository;
 
-    @Test
-    public void shouldUpdatePatientNameAndUsername(){
 
-        UpdateDataPatientRequestDTO updatePatient = UpdateDataPatientRequestDTO.builder()
+    @Nested
+    class WhenPatientExists {
+
+        PatientEntity patientEntity;
+        UpdateDataPatientRequestDTO updateDataPatientRequestDTO;
+
+        @BeforeEach
+        void setup(){
+            patientEntity = builderPatientEntity();
+            updateDataPatientRequestDTO = builderUpdateDataPatientRequest();
+
+            when(patientRepository.findById(patientEntity.getId()))
+                    .thenReturn(Optional.of(patientEntity));
+        }
+
+        @Test
+        public void shouldUpdatePatientNameAndUsername() {
+            PatientResponseDTO result = updateDataPatientUseCase.execute(updateDataPatientRequestDTO,
+                    patientEntity.getId());
+
+            assertThat(result.getName()).isEqualTo(updateDataPatientRequestDTO.getName());
+            assertThat(result.getUsername()).isEqualTo(updateDataPatientRequestDTO.getUsername());
+        }
+
+        @Test
+        public void shouldUpdatePatientName() {
+            PatientResponseDTO result = updateDataPatientUseCase.execute(updateDataPatientRequestDTO,
+                    patientEntity.getId());
+
+            assertThat(result.getName()).isEqualTo(updateDataPatientRequestDTO.getName());
+            assertThat(result.getUsername()).isEqualTo(patientEntity.getUsername());
+        }
+
+        @Test
+        public void shouldUpdatePatientUsername() {
+            PatientResponseDTO result = updateDataPatientUseCase.execute(updateDataPatientRequestDTO,
+                    patientEntity.getId());
+
+            assertThat(result.getName()).isEqualTo(patientEntity.getName());
+            assertThat(result.getUsername()).isEqualTo(updateDataPatientRequestDTO.getUsername());
+        }
+    }
+
+    @Nested
+    class WhenPatientNotExists {
+
+        @Test
+        public void shouldNotUpdatePatient() {
+            when(patientRepository.findById(any(UUID.class)))
+                    .thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> {
+                updateDataPatientUseCase.execute(new UpdateDataPatientRequestDTO(), UUID.randomUUID());
+            }).isInstanceOf(UserNotFoundException.class);
+        }
+    }
+
+    private PatientEntity builderPatientEntity(){
+        return PatientEntity.builder()
+                .id(UUID.randomUUID())
+                .name("weldys")
+                .username("weldyscarmo")
+                .build();
+    }
+
+    private UpdateDataPatientRequestDTO builderUpdateDataPatientRequest(){
+        return UpdateDataPatientRequestDTO.builder()
                 .name("weldys do carmo")
                 .username("weldys002")
                 .build();
-
-        PatientEntity patientEntity = PatientEntity.builder()
-                .id(UUID.randomUUID())
-                .name("weldys")
-                .username("weldyscarmo")
-                .build();
-
-        when(this.patientRepository.findById(patientEntity.getId()))
-                .thenReturn(Optional.of(patientEntity));
-
-        PatientResponseDTO result = this.updateDataPatientUseCase.execute(updatePatient,
-                patientEntity.getId());
-
-        assertThat(result.getName()).isEqualTo(updatePatient.getName());
-        assertThat(result.getUsername()).isEqualTo(updatePatient.getUsername());
-    }
-
-    @Test
-    public void shouldUpdatePatientName(){
-
-        UpdateDataPatientRequestDTO updatePatient = UpdateDataPatientRequestDTO.builder()
-                .name("weldys do carmo")
-                .build();
-
-        PatientEntity patientEntity = PatientEntity.builder()
-                .id(UUID.randomUUID())
-                .name("weldys")
-                .username("weldyscarmo")
-                .build();
-
-        when(this.patientRepository.findById(patientEntity.getId()))
-                .thenReturn(Optional.of(patientEntity));
-
-        PatientResponseDTO result = this.updateDataPatientUseCase.execute(updatePatient,
-                patientEntity.getId());
-
-        assertThat(result.getName()).isEqualTo(updatePatient.getName());
-        assertThat(result.getUsername()).isEqualTo(patientEntity.getUsername());
-    }
-
-    @Test
-    public void shouldUpdatePatientUsername(){
-
-        UpdateDataPatientRequestDTO updatePatient = UpdateDataPatientRequestDTO.builder()
-                .username("weldys002")
-                .build();
-
-        PatientEntity patientEntity = PatientEntity.builder()
-                .id(UUID.randomUUID())
-                .name("weldys")
-                .username("weldyscarmo")
-                .build();
-
-        when(this.patientRepository.findById(patientEntity.getId()))
-                .thenReturn(Optional.of(patientEntity));
-
-        PatientResponseDTO result = this.updateDataPatientUseCase.execute(updatePatient,
-                patientEntity.getId());
-
-        assertThat(result.getName()).isEqualTo(patientEntity.getName());
-        assertThat(result.getUsername()).isEqualTo(updatePatient.getUsername());
-    }
-
-    @Test
-    public void shouldNotUpdatePatient(){
-
-        when(this.patientRepository.findById(any(UUID.class)))
-                .thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> {
-            this.updateDataPatientUseCase.execute(new UpdateDataPatientRequestDTO(), UUID.randomUUID());
-        }).isInstanceOf(UserNotFoundException.class);
     }
 }

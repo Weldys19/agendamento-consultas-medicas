@@ -25,8 +25,8 @@ public class CreatePatientUseCase {
     public PatientResponseDTO execute(CreatePatientRequestDTO createPatientRequestDTO){
 
         this.patientRepository.findByUsernameIgnoreCaseOrEmailIgnoreCase(createPatientRequestDTO.getUsername(),
-                createPatientRequestDTO.getEmail()).ifPresent(user -> {
-                    throw new UserFoundException();
+            createPatientRequestDTO.getEmail()).ifPresent(user -> {
+                throw new UserFoundException();
         });
 
         this.doctorRepository.findByEmailIgnoreCase(createPatientRequestDTO.getEmail()).ifPresent(user -> {

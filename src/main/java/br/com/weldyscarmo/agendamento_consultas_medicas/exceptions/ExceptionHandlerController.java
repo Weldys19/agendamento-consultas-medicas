@@ -97,4 +97,14 @@ public class ExceptionHandlerController {
     public ResponseEntity<String> handlerInvalidCancellationException(InvalidCancellationException e){
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
+
+    @ExceptionHandler(ConflictWithSchedulesException.class)
+    public ResponseEntity<String> handlerConflictWithSchedulesException(ConflictWithSchedulesException e){
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+
+    @ExceptionHandler(TimeSlotUnavailableForBlockingException.class)
+    public ResponseEntity<String> handlerTimeSlotUnavailableForBlockingException(TimeSlotUnavailableForBlockingException e){
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
 }

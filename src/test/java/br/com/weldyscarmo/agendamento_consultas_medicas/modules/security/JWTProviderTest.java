@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 public class JWTProviderTest {
 
@@ -33,7 +33,7 @@ public class JWTProviderTest {
 
         DecodedJWT decodedToken = jwtProvider.validateToken(token);
 
-        assertNotNull(decodedToken);
+        assertThat(decodedToken).isNotNull();
     }
 
     @Test
@@ -45,8 +45,8 @@ public class JWTProviderTest {
                 .withExpiresAt(Instant.now().minus(Duration.ofMinutes(1)))
                 .sign(algorithm);
 
-        assertThrows(InvalidTokenException.class, () -> {
+        assertThatThrownBy(() -> {
             this.jwtProvider.validateToken(token);
-        });
+        }).isInstanceOf(InvalidTokenException.class);
     }
 }
