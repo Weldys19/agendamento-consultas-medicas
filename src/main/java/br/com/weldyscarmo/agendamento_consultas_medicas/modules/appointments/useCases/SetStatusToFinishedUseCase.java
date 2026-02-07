@@ -4,6 +4,7 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.enums.AppointmentsStatus
 import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.AppointmentNotFoundException;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.AppointmentsEntity;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.AppointmentsRepository;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.MapperAppointmentResponseDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.AppointmentsResponseDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,19 +28,6 @@ public class SetStatusToFinishedUseCase {
 
         appointment.setStatus(AppointmentsStatus.FINISHED);
 
-        return builderAppointmentsResponse(appointment);
-    }
-
-    private AppointmentsResponseDTO builderAppointmentsResponse(AppointmentsEntity appointmentsEntity){
-        return AppointmentsResponseDTO.builder()
-                .id(appointmentsEntity.getId())
-                .doctorId(appointmentsEntity.getDoctorId())
-                .patientId(appointmentsEntity.getPatientId())
-                .startTime(appointmentsEntity.getStartTime())
-                .endTime(appointmentsEntity.getEndTime())
-                .date(appointmentsEntity.getDate())
-                .status(appointmentsEntity.getStatus())
-                .createdAt(appointmentsEntity.getCreatedAt())
-                .build();
+        return MapperAppointmentResponseDTO.mapperAppointment(appointment);
     }
 }

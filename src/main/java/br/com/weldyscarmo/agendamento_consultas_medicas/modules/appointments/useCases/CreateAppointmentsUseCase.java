@@ -4,6 +4,7 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.enums.AppointmentsStatus
 import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.*;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.AppointmentsEntity;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.AppointmentsRepository;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.MapperAppointmentResponseDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.AppointmentsResponseDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.CreateAppointmentsRequestDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.*;
@@ -46,63 +47,24 @@ public class CreateAppointmentsUseCase {
 
         LocalTime endTime = createAppointmentsRequestDTO.getStartTime().plusMinutes(doctorEntity.getConsultationDurationInMinutes());
 
+        //Retorna os horários de atendimento do médico no dia a ser marcado o agendamento
         List<DoctorScheduleEntity> schedules = doctorAvailable(doctorId, createAppointmentsRequestDTO);
 
-        List<DoctorTimeBlockEntity> timesBlock = this.doctorTimeBlockRepository
-                .findAllByDoctorIdAndDate(doctorId, createAppointmentsRequestDTO.getDate());
+        //Verifica se o horário do agendamento se encaixa no expediente do médico
+        checkIfTheAppointmentIsWithinTheDoctorWorkingHours(schedules, createAppointmentsRequestDTO, endTime);
 
-        List<AppointmentsEntity> appointmentsDoctor = this.appointmentsRepository.findAllByDoctorIdAndDate(doctorId,
-                createAppointmentsRequestDTO.getDate());
+        //Verifica se o horário do agendamento conflita com outro já cadastrado
+        checkIfTheAppointmentConflictsWithOthersAlreadyRegistered(createAppointmentsRequestDTO, doctorId, endTime);
 
-        boolean invalidSchedule = true;
-        for (DoctorScheduleEntity scheduleEntity : schedules){
-            if (!createAppointmentsRequestDTO.getStartTime().isBefore(scheduleEntity.getStartTime())
-        && !endTime.isAfter(scheduleEntity.getEndTime())){
-                invalidSchedule = false;
-                break;
-            }
-        }
+        //Verifica se o horário do agendamento conflita com horários bloqueados pelo médico
+        checkIfTheAppointmentConflictsWithTimesBlockedByTheDoctor(createAppointmentsRequestDTO, doctorId, endTime);
 
-        if (invalidSchedule){
-            throw new InvalidAppointmentHourException();
-        }
-
-        for (AppointmentsEntity appointments : appointmentsDoctor) {
-            if (createAppointmentsRequestDTO.getStartTime().isBefore(appointments.getEndTime())
-                    && endTime.isAfter(appointments.getStartTime())
-            && appointments.getStatus().equals(AppointmentsStatus.SCHEDULED)){
-                throw new UnavailableScheduleException();
-            }
-        }
-
-        for (DoctorTimeBlockEntity timeBlock : timesBlock){
-            if (createAppointmentsRequestDTO.getStartTime().isBefore(timeBlock.getEndTime())
-            && endTime.isAfter(timeBlock.getStartTime())){
-                throw new UnavailableScheduleException();
-            }
-        }
-
-        AppointmentsEntity appointmentsEntity = AppointmentsEntity.builder()
-                .date(createAppointmentsRequestDTO.getDate())
-                .doctorId(doctorId)
-                .patientId(patientId)
-                .startTime(createAppointmentsRequestDTO.getStartTime())
-                .endTime(endTime)
-                .status(AppointmentsStatus.SCHEDULED)
-                .build();
+        AppointmentsEntity appointmentsEntity = builderAppointmentsEntity(createAppointmentsRequestDTO, doctorId,
+                patientId, endTime);
 
         AppointmentsEntity saved = this.appointmentsRepository.save(appointmentsEntity);
 
-        return AppointmentsResponseDTO.builder()
-                .id(saved.getId())
-                .patientId(saved.getPatientId())
-                .doctorId(saved.getDoctorId())
-                .startTime(saved.getStartTime())
-                .endTime(saved.getEndTime())
-                .date(saved.getDate())
-                .status(saved.getStatus())
-                .createdAt(saved.getCreatedAt())
-                .build();
+        return MapperAppointmentResponseDTO.mapperAppointment(saved);
     }
 
     private List<DoctorScheduleEntity> doctorAvailable(UUID doctorId,
@@ -121,5 +83,64 @@ public class CreateAppointmentsUseCase {
         }
 
         return dailySchedules;
+    }
+
+    private void checkIfTheAppointmentIsWithinTheDoctorWorkingHours(List<DoctorScheduleEntity> schedules,
+                                                                    CreateAppointmentsRequestDTO createAppointmentsRequestDTO,
+                                                                    LocalTime endTime){
+
+        boolean invalidSchedule = true;
+        for (DoctorScheduleEntity scheduleEntity : schedules){
+            if (!createAppointmentsRequestDTO.getStartTime().isBefore(scheduleEntity.getStartTime())
+                    && !endTime.isAfter(scheduleEntity.getEndTime())){
+                invalidSchedule = false;
+                break;
+            }
+        }
+
+        if (invalidSchedule){
+            throw new InvalidAppointmentHourException();
+        }
+    }
+
+    private void checkIfTheAppointmentConflictsWithOthersAlreadyRegistered(CreateAppointmentsRequestDTO createAppointmentsRequestDTO,
+                                                                           UUID doctorId,
+                                                                           LocalTime endTime){
+        List<AppointmentsEntity> appointmentsDoctor = this.appointmentsRepository.findAllByDoctorIdAndDate(doctorId,
+                createAppointmentsRequestDTO.getDate());
+
+        for (AppointmentsEntity appointments : appointmentsDoctor) {
+            if (createAppointmentsRequestDTO.getStartTime().isBefore(appointments.getEndTime())
+                    && endTime.isAfter(appointments.getStartTime())
+                    && appointments.getStatus().equals(AppointmentsStatus.SCHEDULED)){
+                throw new UnavailableScheduleException();
+            }
+        }
+    }
+
+    private void checkIfTheAppointmentConflictsWithTimesBlockedByTheDoctor(CreateAppointmentsRequestDTO createAppointmentsRequestDTO,
+                                                                           UUID doctorId,
+                                                                           LocalTime endTime){
+        List<DoctorTimeBlockEntity> timesBlock = this.doctorTimeBlockRepository
+                .findAllByDoctorIdAndDate(doctorId, createAppointmentsRequestDTO.getDate());
+
+        for (DoctorTimeBlockEntity timeBlock : timesBlock){
+            if (createAppointmentsRequestDTO.getStartTime().isBefore(timeBlock.getEndTime())
+                    && endTime.isAfter(timeBlock.getStartTime())){
+                throw new UnavailableScheduleException();
+            }
+        }
+    }
+
+    private AppointmentsEntity builderAppointmentsEntity(CreateAppointmentsRequestDTO createAppointmentsRequestDTO,
+                                                  UUID doctorId, UUID patientId, LocalTime endTime){
+        return AppointmentsEntity.builder()
+                .date(createAppointmentsRequestDTO.getDate())
+                .doctorId(doctorId)
+                .patientId(patientId)
+                .startTime(createAppointmentsRequestDTO.getStartTime())
+                .endTime(endTime)
+                .status(AppointmentsStatus.SCHEDULED)
+                .build();
     }
 }

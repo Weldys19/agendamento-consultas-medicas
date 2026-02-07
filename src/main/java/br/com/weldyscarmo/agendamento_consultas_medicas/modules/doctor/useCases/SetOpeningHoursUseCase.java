@@ -29,22 +29,11 @@ public class SetOpeningHoursUseCase {
         //Valida se tem sobreposição de horário
         schedulingConflict(createDoctorScheduleRequestDTO, doctorId);
 
-        DoctorScheduleEntity doctorScheduleEntity = DoctorScheduleEntity.builder()
-                .doctorId(doctorId)
-                .dayOfWeek(createDoctorScheduleRequestDTO.getDayOfWeek())
-                .startTime(createDoctorScheduleRequestDTO.getStartTime())
-                .endTime(createDoctorScheduleRequestDTO.getEndTime())
-                . build();
+        DoctorScheduleEntity doctorScheduleEntity = builderDoctorScheduleEntity(doctorId, createDoctorScheduleRequestDTO);
 
-        DoctorScheduleEntity result = this.doctorScheduleRepository.save(doctorScheduleEntity);
+        DoctorScheduleEntity saved = this.doctorScheduleRepository.save(doctorScheduleEntity);
 
-        return DoctorScheduleResponseDTO.builder()
-                .id(result.getId())
-                .doctorId(result.getDoctorId())
-                .dayOfWeek(result.getDayOfWeek())
-                .startTime(result.getStartTime())
-                .endTime(result.getEndTime())
-                .build();
+        return builderDoctorScheduleResponse(saved);
     }
 
     private void schedulingConflict(CreateDoctorScheduleRequestDTO createDoctorScheduleRequestDTO, UUID doctorId){
@@ -58,5 +47,25 @@ public class SetOpeningHoursUseCase {
                 throw new OverlappingSchedulesException();
             }
         });
+    }
+
+    private DoctorScheduleResponseDTO builderDoctorScheduleResponse(DoctorScheduleEntity doctorSchedule){
+        return DoctorScheduleResponseDTO.builder()
+                .id(doctorSchedule.getId())
+                .doctorId(doctorSchedule.getDoctorId())
+                .dayOfWeek(doctorSchedule.getDayOfWeek())
+                .startTime(doctorSchedule.getStartTime())
+                .endTime(doctorSchedule.getEndTime())
+                .build();
+    }
+
+    private DoctorScheduleEntity builderDoctorScheduleEntity
+            (UUID doctorId, CreateDoctorScheduleRequestDTO createDoctorScheduleRequestDTO){
+        return DoctorScheduleEntity.builder()
+                .doctorId(doctorId)
+                .dayOfWeek(createDoctorScheduleRequestDTO.getDayOfWeek())
+                .startTime(createDoctorScheduleRequestDTO.getStartTime())
+                .endTime(createDoctorScheduleRequestDTO.getEndTime())
+                . build();
     }
 }

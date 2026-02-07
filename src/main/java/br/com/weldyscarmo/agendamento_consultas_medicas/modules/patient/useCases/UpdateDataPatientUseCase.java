@@ -34,6 +34,6 @@ public class UpdateDataPatientUseCase {
             patientEntity.setUsername(updateDataPatientRequestDTO.getUsername());
         }
 
-        return MapperPatientResponseDTO.mapperPatientResponse(patientEntity);
+        return MapperPatientResponseDTO.mapperPatient(patientEntity);
     }
 }

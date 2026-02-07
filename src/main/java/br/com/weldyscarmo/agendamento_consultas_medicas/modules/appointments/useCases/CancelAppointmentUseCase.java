@@ -5,6 +5,7 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.AppointmentNo
 import br.com.weldyscarmo.agendamento_consultas_medicas.exceptions.InvalidCancellationException;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.AppointmentsEntity;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.AppointmentsRepository;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.MapperAppointmentResponseDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.AppointmentsResponseDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,25 @@ public class CancelAppointmentUseCase {
     @Transactional
     public AppointmentsResponseDTO execute(String role, UUID userId, UUID appointmentId){
 
+        AppointmentsEntity appointment = checkAPatientOrADoctor(role, appointmentId, userId);
+
+        LocalDateTime dateConsultation = LocalDateTime.of(appointment.getDate(), appointment.getStartTime());
+
+        if (LocalDateTime.now().isAfter(dateConsultation.minusHours(2))) {
+            throw new InvalidCancellationException();
+        }
+
+        appointment.setStatus(AppointmentsStatus.CANCELED);
+
+        return MapperAppointmentResponseDTO.mapperAppointment(appointment);
+    }
+
+    private AppointmentsEntity checkAPatientOrADoctor(String role, UUID appointmentId, UUID userId){
+
         AppointmentsEntity appointment = null;
 
         if (role.equals("ROLE_DOCTOR")) {
-             appointment = this.appointmentsRepository.findByIdAndDoctorId(appointmentId, userId)
+            appointment = this.appointmentsRepository.findByIdAndDoctorId(appointmentId, userId)
                     .orElseThrow(() -> {
                         throw new AppointmentNotFoundException();
                     });
@@ -37,27 +53,6 @@ public class CancelAppointmentUseCase {
                     });
         }
 
-        LocalDateTime dateConsultation = LocalDateTime.of(appointment.getDate(), appointment.getStartTime());
-
-        if (LocalDateTime.now().isAfter(dateConsultation.minusHours(2))) {
-            throw new InvalidCancellationException();
-        }
-
-        appointment.setStatus(AppointmentsStatus.CANCELED);
-
-        return builderAppointmentsResponse(appointment);
-    }
-
-    private AppointmentsResponseDTO builderAppointmentsResponse(AppointmentsEntity appointmentsEntity){
-        return AppointmentsResponseDTO.builder()
-                .id(appointmentsEntity.getId())
-                .doctorId(appointmentsEntity.getDoctorId())
-                .patientId(appointmentsEntity.getPatientId())
-                .startTime(appointmentsEntity.getStartTime())
-                .endTime(appointmentsEntity.getEndTime())
-                .date(appointmentsEntity.getDate())
-                .status(appointmentsEntity.getStatus())
-                .createdAt(appointmentsEntity.getCreatedAt())
-                .build();
+        return appointment;
     }
 }

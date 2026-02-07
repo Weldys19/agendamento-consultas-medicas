@@ -67,7 +67,7 @@ public class DeleteOpeningHoursUseCaseTest {
         @Test
         public void shouldNotDeleteScheduleWhenItDoesNotExist(){
 
-            when(doctorScheduleRepository.findById(any(UUID.class)))
+            when(doctorScheduleRepository.findByIdAndDoctorId(any(UUID.class), any(UUID.class)))
                     .thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> {

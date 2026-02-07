@@ -36,15 +36,20 @@ public class CreatePatientUseCase {
 
         String hashPassword = passwordEncoder.encode(createPatientRequestDTO.getPassword());
 
-        PatientEntity patientEntity = PatientEntity.builder()
+        PatientEntity patientEntity = builderPatientEntity(createPatientRequestDTO, hashPassword);
+
+        PatientEntity savedPatient = this.patientRepository.save(patientEntity);
+
+        return MapperPatientResponseDTO.mapperPatient(savedPatient);
+    }
+
+    private PatientEntity builderPatientEntity(CreatePatientRequestDTO createPatientRequestDTO,
+                                               String hashPassword) {
+        return PatientEntity.builder()
                 .name(createPatientRequestDTO.getName())
                 .email(createPatientRequestDTO.getEmail())
                 .username(createPatientRequestDTO.getUsername())
                 .password(hashPassword)
                 .build();
-
-        PatientEntity savedPatient = this.patientRepository.save(patientEntity);
-
-        return MapperPatientResponseDTO.mapperPatientResponse(savedPatient);
     }
 }

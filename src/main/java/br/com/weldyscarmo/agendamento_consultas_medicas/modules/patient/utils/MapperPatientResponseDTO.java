@@ -5,7 +5,9 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.dtos.Pat
 
 public class MapperPatientResponseDTO {
 
-    public static PatientResponseDTO mapperPatientResponse(PatientEntity patientEntity){
+    private MapperPatientResponseDTO(){}
+
+    public static PatientResponseDTO mapperPatient(PatientEntity patientEntity){
         return PatientResponseDTO.builder()
                 .id(patientEntity.getId())
                 .name(patientEntity.getName())

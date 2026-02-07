@@ -5,6 +5,7 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.DoctorEnt
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.DoctorRepository;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.dtos.CreateDoctorRequestDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.dtos.DoctorResponseDTO;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.utils.MapperDoctorResponseDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.patient.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,23 +34,20 @@ public class CreateDoctorUseCase {
 
         String hashPassword = passwordEncoder.encode(createDoctorRequestDTO.getPassword());
 
-        DoctorEntity doctorEntity = DoctorEntity.builder()
+        DoctorEntity doctorEntity = builderDoctorEntity(createDoctorRequestDTO, hashPassword);
+
+        DoctorEntity savedDoctor = this.doctorRepository.save(doctorEntity);
+
+        return MapperDoctorResponseDTO.mapperDoctor(savedDoctor);
+    }
+
+    private DoctorEntity builderDoctorEntity(CreateDoctorRequestDTO createDoctorRequestDTO, String hashPassword){
+        return DoctorEntity.builder()
                 .name(createDoctorRequestDTO.getName())
                 .email(createDoctorRequestDTO.getEmail())
                 .specialty(createDoctorRequestDTO.getSpecialty())
                 .consultationDurationInMinutes(createDoctorRequestDTO.getConsultationDurationInMinutes())
                 .password(hashPassword)
-                .build();
-
-        DoctorEntity savedDoctor = this.doctorRepository.save(doctorEntity);
-
-        return DoctorResponseDTO.builder()
-                .id(savedDoctor.getId())
-                .name(savedDoctor.getName())
-                .email(savedDoctor.getEmail())
-                .specialty(savedDoctor.getSpecialty())
-                .consultationDurationInMinutes(savedDoctor.getConsultationDurationInMinutes())
-                .createdAt(savedDoctor.getCreatedAt())
                 .build();
     }
 }

@@ -5,6 +5,7 @@ import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.DoctorEnt
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.DoctorRepository;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.dtos.DoctorResponseDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.dtos.UpdateDataDoctorRequestDTO;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.doctor.utils.MapperDoctorResponseDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,13 +36,6 @@ public class UpdateDataDoctorUseCase {
                     (updateDataDoctorRequestDTO.getConsultationDurationInMinutes());
         }
 
-        return DoctorResponseDTO.builder()
-                .id(doctorEntity.getId())
-                .name(doctorEntity.getName())
-                .email(doctorEntity.getEmail())
-                .specialty(doctorEntity.getSpecialty())
-                .consultationDurationInMinutes(doctorEntity.getConsultationDurationInMinutes())
-                .createdAt(doctorEntity.getCreatedAt())
-                .build();
+        return MapperDoctorResponseDTO.mapperDoctor(doctorEntity);
     }
 }

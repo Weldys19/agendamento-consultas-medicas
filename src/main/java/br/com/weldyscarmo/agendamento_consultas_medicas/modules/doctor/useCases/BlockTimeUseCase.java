@@ -39,14 +39,48 @@ public class BlockTimeUseCase {
             throw new InvalidScheduleException();
         }
 
+        //Verifica se o intervalo a ser bloqueado se encaixa nos horários de atendimento
+        checkIfTheBreakIsWithinTheWorkingHours(doctorId, doctorTimeBlockRequestDTO);
+
+        //Verifica se o intervalo a ser bloqueado conflita com consulta agendada
+        checkIfItConflictsWithAScheduledAppointment(doctorId, doctorTimeBlockRequestDTO);
+
+        //Verifica se o intervalo a ser bloqueado conflita com um horário já bloqueado
+        checkIfItConflictsWithAnAlreadyBlockedTimeSlot(doctorId, doctorTimeBlockRequestDTO);
+
+        DoctorTimeBlockEntity doctorTimeBlockEntity = builderDoctorTimeBlockEntity(doctorId, doctorTimeBlockRequestDTO);
+
+        DoctorTimeBlockEntity saved = this.doctorTimeBlockRepository.save(doctorTimeBlockEntity);
+
+        return builderDoctorTimeBlockResponse(saved);
+    }
+
+    private DoctorTimeBlockEntity builderDoctorTimeBlockEntity(UUID doctorId,
+                                                         DoctorTimeBlockRequestDTO doctorTimeBlockRequestDTO){
+        return DoctorTimeBlockEntity.builder()
+                .doctorId(doctorId)
+                .date(doctorTimeBlockRequestDTO.getDate())
+                .startTime(doctorTimeBlockRequestDTO.getStartTime())
+                .endTime(doctorTimeBlockRequestDTO.getEndTime())
+                .build();
+    }
+
+    private DoctorTimeBlockResponseDTO builderDoctorTimeBlockResponse(DoctorTimeBlockEntity doctorTimeBlockEntity){
+        return DoctorTimeBlockResponseDTO.builder()
+                .id(doctorTimeBlockEntity.getId())
+                .doctorId(doctorTimeBlockEntity.getDoctorId())
+                .date(doctorTimeBlockEntity.getDate())
+                .startTime(doctorTimeBlockEntity.getStartTime())
+                .endTime(doctorTimeBlockEntity.getEndTime())
+                .build();
+    }
+
+    private void checkIfTheBreakIsWithinTheWorkingHours(UUID doctorId,
+                                                           DoctorTimeBlockRequestDTO doctorTimeBlockRequestDTO){
         List<DoctorScheduleEntity> schedules = this.doctorScheduleRepository
                 .findAllByDoctorIdAndDayOfWeek(doctorId, doctorTimeBlockRequestDTO.getDate().getDayOfWeek());
 
-        List<AppointmentsEntity> appointments = this.appointmentsRepository
-                .findAllByDoctorIdAndDate(doctorId, doctorTimeBlockRequestDTO.getDate());
-
         boolean rangeValid = false;
-
         for(DoctorScheduleEntity scheduleEntity : schedules) {
             if (!doctorTimeBlockRequestDTO.getStartTime().isBefore(scheduleEntity.getStartTime())
                     && !doctorTimeBlockRequestDTO.getEndTime().isAfter(scheduleEntity.getEndTime())) {
@@ -54,44 +88,35 @@ public class BlockTimeUseCase {
                 break;
             }
         }
-
         if (!rangeValid){
             throw new TimeSlotUnavailableForBlockingException();
         }
+    }
+
+    private void checkIfItConflictsWithAScheduledAppointment(UUID doctorId,
+                                                             DoctorTimeBlockRequestDTO doctorTimeBlockRequestDTO){
+        List<AppointmentsEntity> appointments = this.appointmentsRepository
+                .findAllByDoctorIdAndDate(doctorId, doctorTimeBlockRequestDTO.getDate());
 
         for (AppointmentsEntity appointment : appointments){
             if (doctorTimeBlockRequestDTO.getStartTime().isBefore(appointment.getEndTime())
-            && doctorTimeBlockRequestDTO.getEndTime().isAfter(appointment.getStartTime())
-            && appointment.getStatus().equals(AppointmentsStatus.SCHEDULED)){
+                    && doctorTimeBlockRequestDTO.getEndTime().isAfter(appointment.getStartTime())
+                    && appointment.getStatus().equals(AppointmentsStatus.SCHEDULED)){
                 throw new ConflictWithSchedulesException();
             }
         }
+    }
 
+    private void checkIfItConflictsWithAnAlreadyBlockedTimeSlot(UUID doctorId,
+                                                                DoctorTimeBlockRequestDTO doctorTimeBlockRequestDTO){
         List<DoctorTimeBlockEntity> timesBlock = this.doctorTimeBlockRepository
                 .findAllByDoctorIdAndDate(doctorId, doctorTimeBlockRequestDTO.getDate());
 
-        timesBlock.forEach(timeBlock -> {
+        for (DoctorTimeBlockEntity timeBlock : timesBlock) {
             if (doctorTimeBlockRequestDTO.getStartTime().isBefore(timeBlock.getEndTime())
-            && doctorTimeBlockRequestDTO.getEndTime().isAfter(timeBlock.getStartTime())){
+                    && doctorTimeBlockRequestDTO.getEndTime().isAfter(timeBlock.getStartTime())) {
                 throw new OverlappingSchedulesException();
             }
-        });
-
-        DoctorTimeBlockEntity doctorTimeBlockEntity = DoctorTimeBlockEntity.builder()
-                .doctorId(doctorId)
-                .date(doctorTimeBlockRequestDTO.getDate())
-                .startTime(doctorTimeBlockRequestDTO.getStartTime())
-                .endTime(doctorTimeBlockRequestDTO.getEndTime())
-                .build();
-
-        DoctorTimeBlockEntity saved = this.doctorTimeBlockRepository.save(doctorTimeBlockEntity);
-
-        return DoctorTimeBlockResponseDTO.builder()
-                .id(saved.getId())
-                .doctorId(saved.getDoctorId())
-                .date(saved.getDate())
-                .startTime(saved.getStartTime())
-                .endTime(saved.getEndTime())
-                .build();
+        }
     }
 }

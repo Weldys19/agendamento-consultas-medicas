@@ -2,6 +2,7 @@ package br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.us
 
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.AppointmentsEntity;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.AppointmentsRepository;
+import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.MapperAppointmentResponseDTO;
 import br.com.weldyscarmo.agendamento_consultas_medicas.modules.appointments.dtos.AppointmentsResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,22 +27,9 @@ public class DoctorAppointmentsOnTheDayUseCase {
         
         if (!appointmentsEntity.isEmpty()){
             appointmentsEntity.forEach(appointment -> {
-               appointmentsResponseDTO.add(builderAppointmentsResponse(appointment)); 
+               appointmentsResponseDTO.add(MapperAppointmentResponseDTO.mapperAppointment(appointment));
             });   
         }
         return appointmentsResponseDTO;
-    }
-    
-    private AppointmentsResponseDTO builderAppointmentsResponse(AppointmentsEntity appointmentsEntity){
-        return AppointmentsResponseDTO.builder()
-                .id(appointmentsEntity.getId())
-                .doctorId(appointmentsEntity.getDoctorId())
-                .patientId(appointmentsEntity.getPatientId())
-                .startTime(appointmentsEntity.getStartTime())
-                .endTime(appointmentsEntity.getEndTime())
-                .date(appointmentsEntity.getDate())
-                .status(appointmentsEntity.getStatus())
-                .createdAt(appointmentsEntity.getCreatedAt())
-                .build();
     }
 }
